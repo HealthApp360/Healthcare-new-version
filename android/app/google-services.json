@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "67315578864",
+    "project_id": "projecthealth360-70bb2",
+    "storage_bucket": "projecthealth360-70bb2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:67315578864:android:34b4c7d60501823d0ccf35",
+        "android_client_info": {
+          "package_name": "com.example.healthcare_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBGxl4sL_qFuIi0EFaaONzNUOWbzb5sG_E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

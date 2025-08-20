@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:healthcare_app/main_page.dart';
+import 'package:healthcare_app/pages/consult_doctor/consult_doctor_page.dart';
 
 import 'package:healthcare_app/screens/VideoCallPage.dart';
 import 'package:healthcare_app/pages/my_appointment/my_appointments_page.dart';
@@ -437,39 +438,48 @@ Row(
   }
 
   Widget horizontalDoctorCard(String name, String specialty) {
-    return Container(
-      width: 160.w,
-      margin: EdgeInsets.only(right: 12.w),
-      padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12.r),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          )
-        ],
-      ),
-      child: Column(
-        children: [
-          CircleAvatar(
-            radius: 30.r,
-            backgroundImage: const AssetImage("assets/doctor.jpg"),
-          ),
-          SizedBox(height: 10.h),
-          Text(name,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  fontWeight: FontWeight.bold, fontSize: 14.sp)),
-          SizedBox(height: 4.h),
-          Text(specialty,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13.sp, color: Colors.grey)),
-          SizedBox(height: 8.h),
-          const Icon(Icons.video_call, color: Colors.deepPurple),
-        ],
+    return GestureDetector(
+      onTap: (){
+        print("test");
+        Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ConsultDoctorPage()),
+                );
+      },
+      child: Container(
+        width: 160.w,
+        margin: EdgeInsets.only(right: 12.w),
+        padding: EdgeInsets.all(12.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12.r),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 4,
+              offset: Offset(0, 2),
+            )
+          ],
+        ),
+        child: Column(
+          children: [
+            CircleAvatar(
+              radius: 30.r,
+              backgroundImage: const AssetImage("assets/doctor.jpg"),
+            ),
+            SizedBox(height: 10.h),
+            Text(name,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontWeight: FontWeight.bold, fontSize: 28.sp)),
+            SizedBox(height: 4.h),
+            Text(specialty,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 13.sp, color: Colors.grey)),
+            SizedBox(height: 8.h),
+            const Icon(Icons.video_call, color: Colors.deepPurple),
+          ],
+        ),
       ),
     );
   }

@@ -161,7 +161,7 @@ class _ConsultDoctorPageState extends State<ConsultDoctorPage>
                   ),
                   SizedBox(height: 10.h),
                   SizedBox(
-                    height: 180.h,
+                    height: 160.h,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: 6,
@@ -184,13 +184,14 @@ class _ConsultDoctorPageState extends State<ConsultDoctorPage>
                             ],
                           ),
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              CircleAvatar(
-                                radius: 28.r,
-                                backgroundImage:
-                                    AssetImage('assets/doctor_avatar.png'),
-                              ),
+                             Image.asset('assets/doctor.jpg'),
+                              // CircleAvatar(
+                              //   radius: 28.r,
+                              //   backgroundImage:
+                              //       AssetImage('assets/doctor.jpg'),
+                              // ),
                               SizedBox(height: 8.h),
                               Text(
                                 'Dr. Name ${index + 1}',
@@ -657,7 +658,9 @@ Card(
                 const SizedBox(height: 10),
                 SizedBox(
                   height: 80,
-                  child: ListView.builder(
+                  child:
+                 
+                   ListView.builder(
                     scrollDirection: Axis.horizontal,
                     itemCount: 7,
                     itemBuilder: (_, i) {
@@ -665,7 +668,15 @@ Card(
                       final isSelected = date.day == selectedDate.day;
                       return GestureDetector(
                         onTap: () {
+                          print("selected dtae");
+                          
+                          selectedDate = DateTime.now().add(Duration(days: i + 1));
+                          print(selectedDate);
+                          print(date);
                           selectedDate = date;
+                          setState(() {
+                            selectedDate = date;
+                          });
                         },
                         child: Container(
                           margin: const EdgeInsets.symmetric(horizontal: 6),
