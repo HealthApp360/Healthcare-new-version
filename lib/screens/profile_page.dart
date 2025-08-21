@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:healthcare_app/pages/authentication/login_page.dart';
+import 'package:healthcare_app/services/AuthServices.dart';
 import 'profile_details_page.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -52,6 +54,17 @@ class ProfilePage extends StatelessWidget {
             leading: const Icon(Icons.format_paint),
             title: const Text('Theme'),
             onTap: () {},
+          ),
+           ListTile(
+            leading: const Icon(Icons.logout),
+            title: const Text('Signout'),
+            onTap: () async {
+              await AuthService.signOut();
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => const LoginPage()),
+                (Route<dynamic> route) => false,
+              );
+            },
           ),
         ],
       ),

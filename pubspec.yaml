@@ -32,6 +32,10 @@ dependencies:
   qr_flutter: ^4.0.0 
   provider: ^6.1.1
   firebase_core: ^4.0.0
+  google_sign_in: ^6.1.1
+  firebase_auth: ^6.0.1
+  cloud_firestore: ^6.0.0
+  pretty_qr_code: ^3.5.0
 
 
 
@@ -49,4 +53,4 @@ dependency_overrides:
 flutter:
   uses-material-design: true
   assets:
-    - assets/doctor.jpg
+    - assets/

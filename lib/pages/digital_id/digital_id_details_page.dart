@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:healthcare_app/main_page.dart';
@@ -27,6 +29,8 @@ class DigitalIDDetailsPage extends StatelessWidget {
 
 @override
 Widget build(BuildContext context) {
+  final user = FirebaseAuth.instance.currentUser;
+  final userDocRef = FirebaseFirestore.instance.collection('users').doc(user!.uid);
   return WillPopScope(
     onWillPop: () async {
       if (Navigator.canPop(context)) {
@@ -174,7 +178,7 @@ Widget build(BuildContext context) {
                                 ),
                               ),
                               SizedBox(height: 10.h),
-                              Text("John Doe",
+                              Text(user!.displayName ?? 'User',
                                   style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold)),
                               Text("JEETAG ID: 98765432101234",
                                   style: TextStyle(fontSize: 12.sp, color: Colors.black54)),

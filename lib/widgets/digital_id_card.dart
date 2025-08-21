@@ -1,5 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../screens/passcode_screen.dart';
 
@@ -22,20 +25,20 @@ class DigitalIDCard extends StatelessWidget {
   String _maskAbha(String abha) {
     return abha.replaceRange(4, abha.length - 4, '*' * (abha.length - 8));
   }
-
- void _showQrDialog(BuildContext context, String jeeId) {
+void _showQrDialog(BuildContext context, String jeeId) {
   showDialog(
     context: context,
     barrierDismissible: true,
     builder: (context) => AlertDialog(
       backgroundColor: Colors.white,
-      contentPadding: EdgeInsets.all(24),
+      contentPadding: const EdgeInsets.all(24),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
       content: Builder(
         builder: (context) {
           final width = MediaQuery.of(context).size.width * 0.75;
+
           return SizedBox(
             width: width,
             height: width,
@@ -45,10 +48,16 @@ class DigitalIDCard extends StatelessWidget {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: QrImageView(
-                data: jeeId,
-                version: QrVersions.auto,
-                backgroundColor: Colors.white,
+              child: PrettyQrView.data(
+                data: jeeId, // your ID string
+                decoration: PrettyQrDecoration(
+                  shape: const PrettyQrSmoothSymbol(), // rounded style
+                  // image: const PrettyQrDecorationImage(
+                  //   image: AssetImage('assets/logo.png'), // optional logo
+                  // ),
+                  background: Colors.white,
+                  quietZone: PrettyQrQuietZone.standart, // padding around QR
+                ),
               ),
             ),
           );
@@ -57,11 +66,50 @@ class DigitalIDCard extends StatelessWidget {
     ),
   );
 }
+//  void _showQrDialog(BuildContext context, String jeeId) {
+//   showDialog(
+//     context: context,
+//     barrierDismissible: true,
+//     builder: (context) => AlertDialog(
+//       backgroundColor: Colors.white,
+//       contentPadding: EdgeInsets.all(24),
+//       shape: RoundedRectangleBorder(
+//         borderRadius: BorderRadius.circular(20),
+//       ),
+//       content: Builder(
+//         builder: (context) {
+//           final width = MediaQuery.of(context).size.width * 0.75;
+//           return SizedBox(
+//             width: width,
+//             height: width,
+//             child: Container(
+//               padding: const EdgeInsets.all(20),
+//               decoration: BoxDecoration(
+//                 color: Colors.white,
+//                 borderRadius: BorderRadius.circular(16),
+//               ),
+//               child:
+//               QrImageView(
+//                 data: jeeId,
+//                 version: QrVersions.auto,
+//                 backgroundColor: Colors.white,
+//               ),
+//             ),
+//           );
+//         },
+//       ),
+//     ),
+//   );
+// }
 
 
 
  @override
 Widget build(BuildContext context) {
+  final user = FirebaseAuth.instance.currentUser;
+ final userDocRef = FirebaseFirestore.instance.collection('users').doc(user!.uid);
+ var jeeid = "";
+
   return GestureDetector(
     onTap: () async {
       final authenticated = await Navigator.push<bool>(
@@ -120,7 +168,7 @@ Widget build(BuildContext context) {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      name,
+                      user!.displayName ?? 'User',
                       style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.bold,
@@ -128,10 +176,32 @@ Widget build(BuildContext context) {
                       ),
                     ),
                     SizedBox(height: 2.h),
-                    Text(
-                      "JEE ID: ${_maskAbha(jeeId)}",
+                      FutureBuilder<DocumentSnapshot>(
+                future: userDocRef.get(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    //return const CircularProgressIndicator();
+                  }
+                  if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  }
+                  if (snapshot.hasData && snapshot.data!.exists) {
+                    final userData = snapshot.data!.data() as Map<String, dynamic>;
+                    final customId = userData['customId'];
+                    jeeid = customId;
+                    // return Text(
+                    //   customId ?? 'ID not found',
+                    //   style: const TextStyle(fontSize: 20, color: Colors.blueAccent),
+                    // );
+                    return Text(
+                      "JEE ID: ${_maskAbha(customId)}",
                       style: TextStyle(fontSize: 11.sp, color: const Color.fromARGB(255, 0, 0, 0)),
-                    ),
+                    );
+                  }
+                  return  Text('JEE ID:',style: TextStyle(fontSize: 11.sp, color: const Color.fromARGB(255, 0, 0, 0)));
+                },
+              ),
+                    
                     Text(
                       "ABHA: ${_maskAbha(abhaNumber)}",
                       style: TextStyle(fontSize: 11.sp, color: const Color.fromARGB(255, 0, 0, 0)),
@@ -140,10 +210,11 @@ Widget build(BuildContext context) {
                 ),
               ),
               IconButton(
-                onPressed: () => _showQrDialog(context, jeeId),
+                onPressed: () => _showQrDialog(context, jeeid),
                 icon: Icon(Icons.qr_code, color: const Color.fromARGB(255, 0, 0, 0), size: 50.r),
                 tooltip: "Show QR",
               ),
+              
             ],
           ),
         ],
