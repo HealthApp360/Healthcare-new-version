@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
@@ -6,6 +8,8 @@ import 'package:healthcare_app/main_page.dart';
 import 'package:healthcare_app/pages/my_appointment/my_appointments_page.dart';
 import 'package:healthcare_app/screens/VideoCallPage.dart';
 import 'package:healthcare_app/screens/notification_page.dart';
+import 'package:healthcare_app/widgets/doctors_horizontal_list.dart';
+import 'package:healthcare_app/widgets/my_appointment.dart';
 
 class ConsultDoctorPage extends StatefulWidget {
   const ConsultDoctorPage({super.key});
@@ -81,6 +85,12 @@ class _ConsultDoctorPageState extends State<ConsultDoctorPage>
   }
 
   Widget buildOfflineTab() {
+    final user = FirebaseAuth.instance.currentUser;
+    var res = FirebaseFirestore.instance
+          .collection('appointments')
+          .where('userId', isEqualTo: user!.uid)
+          .orderBy('bookedAt', descending: false) // <- corrected query
+          .snapshots();
     return ListView(
       padding: EdgeInsets.all(16.w),
       children: [
@@ -113,6 +123,7 @@ class _ConsultDoctorPageState extends State<ConsultDoctorPage>
             ),
           ],
         ),
+        
         SizedBox(height: 20.h),
         Text("Hospitals Near You",
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp)),
@@ -160,64 +171,7 @@ class _ConsultDoctorPageState extends State<ConsultDoctorPage>
                     style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 10.h),
-                  SizedBox(
-                    height: 160.h,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: 6,
-                      itemBuilder: (context, index) {
-                        return GestureDetector(
-                          onTap: () => _showBookingDialog(context),
-                          child: Container( 
-                          width: 140.w,
-                          margin: EdgeInsets.symmetric(horizontal: 8.w),
-                          padding: EdgeInsets.all(10.w),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12.r),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.shade300,
-                                blurRadius: 6.r,
-                                offset: Offset(0, 2.h),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                             Image.asset('assets/doctor.jpg'),
-                              // CircleAvatar(
-                              //   radius: 28.r,
-                              //   backgroundImage:
-                              //       AssetImage('assets/doctor.jpg'),
-                              // ),
-                              SizedBox(height: 8.h),
-                              Text(
-                                'Dr. Name ${index + 1}',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 14.sp),
-                              ),
-                              Text('Cardiologist',
-                                  style: TextStyle(
-                                      fontSize: 12.sp, color: Colors.black54)),
-                              Spacer(),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Icon(Icons.star,
-                                      color: Colors.orange, size: 16.r),
-                                  Text("4.${index + 1}",
-                                      style: TextStyle(fontSize: 14.sp)),
-                                ],
-                              )
-                            ],
-                          ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                  DoctorsHorizontalList(),
                   SizedBox(height: 20.h),
 
                   Container(
@@ -258,10 +212,15 @@ class _ConsultDoctorPageState extends State<ConsultDoctorPage>
         SizedBox(height: 20.h),
         Text("Appointment Reminders",
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp)),
-        ListTile(
-          leading: Icon(Icons.alarm, size: 24.r),
-          title: Text("Dr. Meera - Aug 7, 4:00 PM", style: TextStyle(fontSize: 14.sp)),
-        ),
+        // ListTile(
+        //   leading: Icon(Icons.alarm, size: 24.r),
+        //   title: Text("Dr. Meera - Aug 7, 4:00 PM", style: TextStyle(fontSize: 14.sp)),
+        // ),
+        
+         SizedBox(height: 200,
+         child: MyAppointmentsList(userId: user.uid),),
+        
+        
         SizedBox(height: 20.h),
         Text("Recently Visited Doctors", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold)),
                   SizedBox(height: 8.h),
@@ -293,6 +252,7 @@ class _ConsultDoctorPageState extends State<ConsultDoctorPage>
                   ),
       ],
     );
+    
   }
 
  Widget buildOnlineTab() {

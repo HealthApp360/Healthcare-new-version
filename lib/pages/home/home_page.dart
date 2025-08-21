@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:healthcare_app/mockdata/mockdoctordata.dart';
 
 import 'package:healthcare_app/screens/profile_page.dart';
 import 'package:healthcare_app/screens/notification_page.dart';
@@ -444,7 +445,13 @@ Widget _buildHealthCircle(String title, double current, double recommended, Colo
             ),
           ),
           SizedBox(height: 14.h),
-
+// ElevatedButton(
+//   onPressed: () async {
+//     await addFakeDoctors();
+//     print("Doctor added successfully!");
+//   },
+//   child: const Text("Add Doctor"),
+// ),
           _buildRow([
             _buildItem(Icons.person_search, 'Consult Doctor', 'consult doctor', 'consult doctor'),
             _buildItem(Icons.science, 'Book Test', 'diagnostic tests', 'diagnostic tests'),

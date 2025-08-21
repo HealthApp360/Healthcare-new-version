@@ -29,7 +29,7 @@ android {
         // For more information, see: https://flutter.dev/to/review-gradle-config.
 
         // CORRECTED LINES: Use '=' for assignment in Kotlin DSL
-        minSdkVersion (24)
+        minSdkVersion (26)
         targetSdkVersion (33)
 
         versionCode = 1

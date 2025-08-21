@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:healthcare_app/firebase_options.dart';
 import 'package:healthcare_app/main_page.dart';
 import 'package:healthcare_app/pages/authentication/login_page.dart';
+import 'package:healthcare_app/widgets/my_appointment.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -60,7 +61,7 @@ class AuthWrapper extends StatelessWidget {
           return const MainPage();
         } else {
           // User is signed out
-          return const LoginPage();
+          return  const LoginPage();
         }
       },
     );

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_webrtc/flutter_webrtc.dart';
+// import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -16,8 +16,8 @@ class VideoCallPage extends StatefulWidget {
 }
 
 class _VideoCallPageState extends State<VideoCallPage> {
-  final RTCVideoRenderer _localRenderer = RTCVideoRenderer();
-  MediaStream? _localStream;
+  // final RTCVideoRenderer _localRenderer = RTCVideoRenderer();
+  // MediaStream? _localStream;
 
   final FlutterSoundRecorder _recorder = FlutterSoundRecorder();
   Timer? _recordingTimer;
@@ -30,7 +30,7 @@ class _VideoCallPageState extends State<VideoCallPage> {
   @override
   void initState() {
     super.initState();
-    _localRenderer.initialize(); // Initialize renderer early
+  //  _localRenderer.initialize(); // Initialize renderer early
     _requestAndInitializeMedia(); // Start permission request and media setup
   }
 
@@ -53,7 +53,7 @@ class _VideoCallPageState extends State<VideoCallPage> {
         _permissionsGranted = true;
       });
       print("Camera and Microphone permissions granted.");
-      await _initializeMediaStream(); // Proceed to get media stream
+      //await _initializeMediaStream(); // Proceed to get media stream
       await _initMicrophoneRecording(); // Initialize recorder
     } else {
       setState(() {
@@ -70,39 +70,39 @@ class _VideoCallPageState extends State<VideoCallPage> {
   }
 
   // Original _initializeRenderer logic, now renamed and called after permissions
-  Future<void> _initializeMediaStream() async {
-    if (!_permissionsGranted) {
-      print("Cannot initialize media stream: Permissions not granted.");
-      return;
-    }
-    try {
-      final mediaStream = await navigator.mediaDevices.getUserMedia({
-        'audio': true,
-        'video': {
-          'facingMode': 'user',
-          'width': 640,
-          'height': 480,
-          'frameRate': 30,
-        }
-      });
-      setState(() {
-        _localStream = mediaStream;
-        _localRenderer.srcObject = mediaStream;
-      });
-      print("Media stream initialized successfully.");
-    } catch (e) {
-      print("Media access error during getUserMedia: $e");
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Media access error: ${e.toString()}')),
-        );
-      }
-      // If media access fails even after permissions, it might be a device issue
-      setState(() {
-        _recognizedText = "Failed to access camera/microphone. Check device settings.";
-      });
-    }
-  }
+  // Future<void> _initializeMediaStream() async {
+  //   if (!_permissionsGranted) {
+  //     print("Cannot initialize media stream: Permissions not granted.");
+  //     return;
+  //   }
+  //   try {
+  //     final mediaStream = await navigator.mediaDevices.getUserMedia({
+  //       'audio': true,
+  //       'video': {
+  //         'facingMode': 'user',
+  //         'width': 640,
+  //         'height': 480,
+  //         'frameRate': 30,
+  //       }
+  //     });
+  //     setState(() {
+  //       _localStream = mediaStream;
+  //       _localRenderer.srcObject = mediaStream;
+  //     });
+  //     print("Media stream initialized successfully.");
+  //   } catch (e) {
+  //     print("Media access error during getUserMedia: $e");
+  //     if (mounted) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Media access error: ${e.toString()}')),
+  //       );
+  //     }
+  //     // If media access fails even after permissions, it might be a device issue
+  //     setState(() {
+  //       _recognizedText = "Failed to access camera/microphone. Check device settings.";
+  //     });
+  //   }
+  // }
 
   Future<void> _initMicrophoneRecording() async {
     if (!_permissionsGranted) {
@@ -280,11 +280,11 @@ class _VideoCallPageState extends State<VideoCallPage> {
         await _recorder.closeRecorder();
     }
 
-    _localStream?.getTracks().forEach((track) => track.stop());
-    if (_localRenderer.srcObject != null) {
-      _localRenderer.srcObject = null;
-    }
-    await _localRenderer.dispose();
+    // _localStream?.getTracks().forEach((track) => track.stop());
+    // if (_localRenderer.srcObject != null) {
+    //   _localRenderer.srcObject = null;
+    // }
+    // await _localRenderer.dispose();
 
     if (mounted) {
       Navigator.pop(context);
@@ -305,34 +305,34 @@ class _VideoCallPageState extends State<VideoCallPage> {
         child: Column(
           children: [
             // Video preview
-            Expanded(
-              flex: 3,
-              child: _permissionsGranted
-                  ? RTCVideoView(
-                      _localRenderer,
-                      objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-                      mirror: true,
-                    )
-                  : Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const CircularProgressIndicator(),
-                          const SizedBox(height: 16),
-                          Text(
-                            _recognizedText,
-                            style: const TextStyle(color: Colors.white, fontSize: 18),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: _requestAndInitializeMedia,
-                            child: const Text("Retry Permissions"),
-                          ),
-                        ],
-                      ),
-                    ),
-            ),
+            // Expanded(
+            //   flex: 3,
+            //   // child: _permissionsGranted
+            //   //     // ? RTCVideoView(
+            //   //     //     _localRenderer,
+            //   //     //     objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+            //   //     //     mirror: true,
+            //   //     //   )
+            //   //     : Center(
+            //   //         child: Column(
+            //   //           mainAxisAlignment: MainAxisAlignment.center,
+            //   //           children: [
+            //   //             const CircularProgressIndicator(),
+            //   //             const SizedBox(height: 16),
+            //   //             Text(
+            //   //               _recognizedText,
+            //   //               style: const TextStyle(color: Colors.white, fontSize: 18),
+            //   //               textAlign: TextAlign.center,
+            //   //             ),
+            //   //             const SizedBox(height: 16),
+            //   //             ElevatedButton(
+            //   //               onPressed: _requestAndInitializeMedia,
+            //   //               child: const Text("Retry Permissions"),
+            //   //             ),
+            //   //           ],
+            //   //         ),
+            //   //       ),
+            // ),
 
             // Subtitle display
             Expanded(
