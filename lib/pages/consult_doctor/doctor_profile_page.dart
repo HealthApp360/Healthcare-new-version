@@ -58,7 +58,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
 
                   // Calendar Date Picker
                   SizedBox(
-                    height: 120,
+                    height: 100,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: 7, // next 7 days
@@ -74,11 +74,11 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                             setModalState(() => selectedDate = date);
                           },
                           child: Container(
-                            width: 80,
+                            width: 70,
                             margin: const EdgeInsets.symmetric(horizontal: 6),
                             decoration: BoxDecoration(
                               color: isSelected ? Colors.blue : Colors.white,
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(100),
                               border: Border.all(color: Colors.blueAccent),
                             ),
                             child: Column(
@@ -164,6 +164,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                                 .add({
                               "userId": user.uid,
                               "userEmail": user.email,
+                              "userName":user.displayName,
                               "doctorId": widget.doctorId,
                               "doctorName": widget.doctor["fullName"],
                               "doctorSpecialization":
@@ -202,9 +203,10 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(doctor["fullName"] ?? "Doctor"),
+        //title: Text(doctor["fullName"] ?? "Doctor"),
       ),
-      body: SingleChildScrollView(
+      body: 
+      SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -217,10 +219,19 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
             ),
             const SizedBox(height: 16),
             Center(
-              child: Text(
-                doctor["fullName"] ?? "",
-                style:
-                    const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    doctor["fullName"] ?? "",
+                    style:
+                        const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(width: 10,),
+                  if(doctor["isVerified"])...[
+                  Image.asset('assets/verified.png',width: 20,height: 20,),
+                ]
+                ],
               ),
             ),
             Center(
@@ -229,6 +240,54 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                 style: TextStyle(color: Colors.grey[600], fontSize: 16),
               ),
             ),
+            Container(
+              width: double.infinity,
+              height: 80,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+               Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Center(
+                    child: Image.asset(
+                      'assets/star.png',
+                      width: 16, // adjust size to match text
+                      height: 16,
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  Center(
+                    child: Text(
+                      doctor["rating"]?.toString() ?? "",
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              
+               Row(
+                children: [
+                  Text(
+                  "reviews",
+                  style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                ),
+                SizedBox(width: 10,),
+                Text(
+                  doctor["reviewsCount"].toString() ?? "",
+                  style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                ),
+                ],
+               )
+                
+                
+                ],
+              ),
+            ),
+           
             const SizedBox(height: 20),
             const Text("About Doctor",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
@@ -252,6 +311,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
           ],
         ),
       ),
+      
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(12.0),
         child: ElevatedButton(

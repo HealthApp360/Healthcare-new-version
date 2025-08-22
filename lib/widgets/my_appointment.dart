@@ -11,7 +11,8 @@ class MyAppointmentsList extends StatelessWidget {
     required String roomName,
     required String userName,
   }) async {
-    var options = JitsiMeetConferenceOptions(
+   try{
+ var options = JitsiMeetConferenceOptions(
       serverURL: "https://meet.jit.si",
       room: roomName, // Unique room ID
       configOverrides: {
@@ -22,6 +23,10 @@ class MyAppointmentsList extends StatelessWidget {
     );
 
     await JitsiMeet().join(options);
+   }catch(e){
+print(e.toString());
+   }
+
   }
 
   @override
@@ -56,7 +61,7 @@ class MyAppointmentsList extends StatelessWidget {
 
             return FutureBuilder<DocumentSnapshot>(
               future: FirebaseFirestore.instance
-                  .collection("users")
+                  .collection("doctors")
                   .doc(doctorId)
                   .get(),
               builder: (context, doctorSnap) {
@@ -72,7 +77,7 @@ class MyAppointmentsList extends StatelessWidget {
                 }
 
                 final doctorName = doctorData["fullName"] ?? "Doctor";
-                final userName = appointment["userEmail"] ?? "User";
+                final userName = appointment["userName"] ?? "User";
                 return Card(
                   margin:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

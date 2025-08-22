@@ -299,18 +299,19 @@ class _ConsultDoctorPageState extends State<ConsultDoctorPage>
         style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
       ),
       SizedBox(height: 12.h),
-      SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            horizontalDoctorCard("Dr. Anita Reddy", "Cardiologist"),
-            horizontalDoctorCard("Dr. Michael Lee", "Dermatologist"),
-            horizontalDoctorCard("Dr. Kavita Rao", "Pediatrician"),
-            horizontalDoctorCard("Dr. Arjun Das", "Orthopedic"),
-            horizontalDoctorCard("Dr. Meera Jain", "Neurologist"),
-          ],
-        ),
-      ),
+      // SingleChildScrollView(
+      //   scrollDirection: Axis.horizontal,
+      //   child: Row(
+      //     children: [
+      //       horizontalDoctorCard("Dr. Anita Reddy", "Cardiologist"),
+      //       horizontalDoctorCard("Dr. Michael Lee", "Dermatologist"),
+      //       horizontalDoctorCard("Dr. Kavita Rao", "Pediatrician"),
+      //       horizontalDoctorCard("Dr. Arjun Das", "Orthopedic"),
+      //       horizontalDoctorCard("Dr. Meera Jain", "Neurologist"),
+      //     ],
+      //   ),
+      // ),
+       DoctorsHorizontalList(),
 
       SizedBox(height: 24.h),
 

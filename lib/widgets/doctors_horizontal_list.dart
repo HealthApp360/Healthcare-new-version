@@ -8,7 +8,7 @@ class DoctorsHorizontalList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 220,
+      height: 200,
       child: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('doctors').limit(20).snapshots(),
         builder: (context, snapshot) {
@@ -49,33 +49,97 @@ class DoctorsHorizontalList extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircleAvatar(
-                        radius: 40,
-                        backgroundImage: NetworkImage(doctor["profilePicture"] ?? ""),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        doctor["fullName"] ?? "Unknown",
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        doctor["specialization"] ?? "",
-                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        "₹${doctor["consultationFee"] ?? ""}",
-                        style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w600),
-                      ),
-                    ],
-                  ),
+                  child: 
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Column(
+                      children: [
+                        Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                              CircleAvatar(
+                          radius: 30,
+                          backgroundImage: 
+                          NetworkImage(doctor["profilePicture"] ?? "",),
+                        ),
+                        ClipRRect(
+                          borderRadius: BorderRadiusGeometry.circular(10),
+                          child: Container(
+                           color: Colors.blueAccent,
+                           padding: EdgeInsets.all(5),
+                            child: Text("Avaliable",style: TextStyle(fontSize: 12,color: Colors.white),)),
+                        )
+                      ],
+                    ),
+                        const SizedBox(height: 8),
+                       Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                           Text(
+                          doctor["fullName"] ?? "Unknown",
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          doctor["specialization"] ?? "",
+                          style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                        ),
+                        ],
+                       ),
+                       SizedBox(height: 30,),
+                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Image.asset("assets/star.png",width: 18,height: 18,),
+                    
+                                  SizedBox(width: 5,),
+                                   Text(
+                          "${doctor["rating"] ?? ""}",
+                          style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
+                        ),
+                                ],
+                              ),
+                               Text(
+                          "₹${doctor["consultationFee"] ?? ""}",
+                          style: const TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.w400,fontSize: 20),
+                        ),
+                        ],
+                       )
+                      ],
+                    ),
+                  )
+                  // Column(
+                  //   mainAxisAlignment: MainAxisAlignment.center,
+                  //   children: [
+                  //     CircleAvatar(
+                  //       radius: 40,
+                  //       backgroundImage: NetworkImage(doctor["profilePicture"] ?? ""),
+                  //     ),
+                  //     const SizedBox(height: 8),
+                  //     Text(
+                  //       doctor["fullName"] ?? "Unknown",
+                  //       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  //       textAlign: TextAlign.center,
+                  //       maxLines: 1,
+                  //       overflow: TextOverflow.ellipsis,
+                  //     ),
+                  //     Text(
+                  //       doctor["specialization"] ?? "",
+                  //       style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                  //       textAlign: TextAlign.center,
+                  //     ),
+                  //     const SizedBox(height: 6),
+                  //     Text(
+                  //       "₹${doctor["consultationFee"] ?? ""}",
+                  //       style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w600),
+                  //     ),
+                  //   ],
+                  // ),
                 ),
               );
             },

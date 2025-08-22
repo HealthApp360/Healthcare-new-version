@@ -12,7 +12,12 @@
         tools:replace="android:label"
         android:label="healthcare_app"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="true"
+        android:hardwareAccelerated="true"
+        android:supportsRtl="true"
+        android:requestLegacyExternalStorage="true"
+        tools:targetApi="31">
         <activity
             android:name=".MainActivity"
             android:exported="true"
