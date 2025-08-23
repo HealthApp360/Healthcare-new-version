@@ -6,7 +6,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 class DoctorProfilePage extends StatefulWidget {
   final Map<String, dynamic> doctor;
   final String doctorId;
-  const DoctorProfilePage({super.key, required this.doctor, required this.doctorId});
+  const DoctorProfilePage({
+    super.key,
+    required this.doctor,
+    required this.doctorId,
+  });
 
   @override
   State<DoctorProfilePage> createState() => _DoctorProfilePageState();
@@ -18,12 +22,48 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
 
   // Example available slots
   final List<String> timeSlots = [
-    "10:00 AM", "11:00 AM", "12:00 PM",
-    "2:00 PM", "3:00 PM", "4:00 PM",
-    "6:00 PM", "7:00 PM",
+    "10:00 AM",
+    "11:00 AM",
+    "12:00 PM",
+    "2:00 PM",
+    "3:00 PM",
+    "4:00 PM",
+    "6:00 PM",
+    "7:00 PM",
   ];
+  List<String> generateTimeSlots(List<dynamic> ranges) {
+    List<String> slots = [];
+
+    for (var range in ranges) {
+      final parts = range.split("-");
+      if (parts.length != 2) continue;
+
+      final start = parts[0].trim();
+      final end = parts[1].trim();
+
+      // Parse into DateTime (using today’s date as base)
+      DateTime startTime = DateFormat("HH:mm").parse(start);
+      DateTime endTime = DateFormat("HH:mm").parse(end);
+
+      while (startTime.isBefore(endTime)) {
+        DateTime next = startTime.add(const Duration(minutes: 30));
+        if (next.isAfter(endTime)) break;
+
+        slots.add(
+          "${DateFormat("HH:mm").format(startTime)}-${DateFormat("HH:mm").format(next)}",
+        );
+
+        startTime = next;
+      }
+    }
+
+    return slots;
+  }
 
   void _showBookingSheet(BuildContext context) {
+    List<String> bookedSlots = [];
+    DateTime selectedDate = DateTime.now();
+    String? selectedTime;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -33,6 +73,55 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setModalState) {
+            // 🔹 Fetch booked slots for initial date
+            // Future<void> fetchBookedSlots(DateTime date) async {
+            //   final snapshot = await FirebaseFirestore.instance
+            //       .collection("appointments")
+            //       .where("doctorId", isEqualTo: widget.doctorId)
+            //       .where("appointmentDate",
+            //           isEqualTo: DateFormat("yyyy-MM-dd").format(date))
+            //       .get();
+
+            //   final slots = snapshot.docs
+            //       .map((doc) => doc["appointmentTime"] as String)
+            //       .toList();
+
+            //   setModalState(() {
+            //     bookedSlots = slots;
+            //     selectedTime = null;
+            //   });
+            // }
+            Future<void> fetchBookedSlots(DateTime date) async {
+              final snapshot = await FirebaseFirestore.instance
+                  .collection("appointments")
+                  .where("doctorId", isEqualTo: widget.doctorId)
+                  .where(
+                    "appointmentDate",
+                    isEqualTo: DateFormat("yyyy-MM-dd").format(date),
+                  )
+                  .get();
+
+              final slots = snapshot.docs
+                  .map((doc) => doc["appointmentTime"] as String)
+                  .toList();
+
+              setModalState(() {
+                bookedSlots = slots;
+                // ❌ remove selectedTime = null;
+                // only reset if the newly selected date changes
+                if (DateFormat("yyyy-MM-dd").format(date) !=
+                    DateFormat("yyyy-MM-dd").format(selectedDate)) {
+                  selectedTime = null;
+                }
+              });
+            }
+
+            // 🔹 Run once when bottom sheet opens
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (bookedSlots.isEmpty) {
+                fetchBookedSlots(selectedDate);
+              }
+            });
             return Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -63,15 +152,42 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                       scrollDirection: Axis.horizontal,
                       itemCount: 7, // next 7 days
                       itemBuilder: (context, index) {
-                        DateTime date =
-                            DateTime.now().add(Duration(days: index));
-                        bool isSelected = selectedDate != null &&
+                        DateTime date = DateTime.now().add(
+                          Duration(days: index),
+                        );
+                        bool isSelected =
+                            selectedDate != null &&
                             DateFormat('yyyy-MM-dd').format(selectedDate!) ==
                                 DateFormat('yyyy-MM-dd').format(date);
 
                         return GestureDetector(
-                          onTap: () {
+                          // onTap: () {
+                          //   setModalState(() => selectedDate = date);
+                          // },
+                          onTap: () async {
                             setModalState(() => selectedDate = date);
+
+                            // 🔹 fetch booked slots for this doctor & date
+                            final snapshot = await FirebaseFirestore.instance
+                                .collection("appointments")
+                                .where("doctorId", isEqualTo: widget.doctorId)
+                                .where(
+                                  "appointmentDate",
+                                  isEqualTo: DateFormat(
+                                    "yyyy-MM-dd",
+                                  ).format(date),
+                                )
+                                .get();
+
+                            final slots = snapshot.docs
+                                .map((doc) => doc["appointmentTime"] as String)
+                                .toList();
+
+                            setModalState(() {
+                              bookedSlots = slots;
+                              selectedTime =
+                                  null; // reset selection if slot blocked
+                            });
                           },
                           child: Container(
                             width: 70,
@@ -120,27 +236,47 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                   const SizedBox(height: 12),
 
                   Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: timeSlots.map((slot) {
-                      bool isSelected = selectedTime == slot;
-                      return ChoiceChip(
-                        label: Text(slot),
-                        selected: isSelected,
-                        selectedColor: Colors.blue,
-                        labelStyle: TextStyle(
-                          color: isSelected ? Colors.white : Colors.black,
-                        ),
-                        onSelected: (_) {
-                          setModalState(() => selectedTime = slot);
-                        },
-                      );
-                    }).toList(),
+                    spacing: 2,
+                    runSpacing: 2,
+                    children:
+                        generateTimeSlots(
+                          widget.doctor["availableSlots"] as List<dynamic>? ??
+                              [],
+                        ).map((slot) {
+                          bool isSelected = selectedTime == slot;
+                          bool isBooked = bookedSlots.contains(slot);
+
+                          return ChoiceChip(
+                            label: Text(
+                              slot,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: isBooked
+                                    ? Colors
+                                          .grey // booked → grey text
+                                    : (isSelected
+                                          ? Colors.white
+                                          : Colors.black),
+                              ),
+                            ),
+                            selected: isSelected,
+                            selectedColor: Colors.blue,
+                            showCheckmark: false,
+                            disabledColor: Colors.grey[300], // booked slot bg
+                            onSelected: isBooked
+                                ? null // 🔹 disable tap
+                                : (_) {
+                                    setModalState(() => selectedTime = slot);
+                                  },
+                          );
+                        }).toList(),
                   ),
 
                   const SizedBox(height: 20),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
                       minimumSize: const Size(double.infinity, 50),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -152,7 +288,9 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                             if (user == null) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text("Please login to book appointment"),
+                                  content: Text(
+                                    "Please login to book appointment",
+                                  ),
                                 ),
                               );
                               return;
@@ -162,18 +300,19 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
                             await FirebaseFirestore.instance
                                 .collection("appointments")
                                 .add({
-                              "userId": user.uid,
-                              "userEmail": user.email,
-                              "userName":user.displayName,
-                              "doctorId": widget.doctorId,
-                              "doctorName": widget.doctor["fullName"],
-                              "doctorSpecialization":
-                                  widget.doctor["specialization"],
-                              "appointmentDate": DateFormat("yyyy-MM-dd")
-                                  .format(selectedDate!),
-                              "appointmentTime": selectedTime,
-                              "bookedAt": DateTime.now(),
-                            });
+                                  "userId": user.uid,
+                                  "userEmail": user.email,
+                                  "userName": user.displayName,
+                                  "doctorId": widget.doctorId,
+                                  "doctorName": widget.doctor["fullName"],
+                                  "doctorSpecialization":
+                                      widget.doctor["specialization"],
+                                  "appointmentDate": DateFormat(
+                                    "yyyy-MM-dd",
+                                  ).format(selectedDate!),
+                                  "appointmentTime": selectedTime,
+                                  "bookedAt": DateTime.now(),
+                                });
 
                             Navigator.pop(context);
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -203,126 +342,229 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
 
     return Scaffold(
       appBar: AppBar(
-        //title: Text(doctor["fullName"] ?? "Doctor"),
+        backgroundColor: Colors.grey[100],
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.more_vert, color: Colors.black),
+            onPressed: () {},
+          ),
+        ],
       ),
-      body: 
-      SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+      backgroundColor: Colors.grey[100],
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Center(
-              child: CircleAvatar(
-                radius: 60,
-                backgroundImage: NetworkImage(doctor["profilePicture"] ?? ""),
-              ),
+            // Profile Image
+            CircleAvatar(
+              radius: 45,
+              backgroundImage: NetworkImage(
+                doctor["profilePicture"] ?? "",
+              ), // replace with your asset
             ),
-            const SizedBox(height: 16),
-            Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    doctor["fullName"] ?? "",
-                    style:
-                        const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(width: 10,),
-                  if(doctor["isVerified"])...[
-                  Image.asset('assets/verified.png',width: 20,height: 20,),
-                ]
-                ],
-              ),
-            ),
-            Center(
-              child: Text(
-                doctor["specialization"] ?? "",
-                style: TextStyle(color: Colors.grey[600], fontSize: 16),
-              ),
-            ),
-            Container(
-              width: double.infinity,
-              height: 80,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-               Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Center(
-                    child: Image.asset(
-                      'assets/star.png',
-                      width: 16, // adjust size to match text
-                      height: 16,
-                    ),
-                  ),
-                  const SizedBox(width: 5),
-                  Center(
-                    child: Text(
-                      doctor["rating"]?.toString() ?? "",
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              
-               Row(
-                children: [
-                  Text(
-                  "reviews",
-                  style: TextStyle(color: Colors.grey[600], fontSize: 16),
-                ),
-                SizedBox(width: 10,),
+            const SizedBox(height: 10),
+
+            // Doctor Name
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
                 Text(
-                  doctor["reviewsCount"].toString() ?? "",
-                  style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                  doctor["fullName"] ?? "",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
+                SizedBox(width: 10),
+                if (doctor["isVerified"]) ...[
+                  Image.asset('assets/verified.png', width: 20, height: 20),
                 ],
-               )
-                
-                
-                ],
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              doctor["specialization"] ?? "",
+              style: TextStyle(color: Colors.grey[600], fontSize: 16),
+            ),
+            const SizedBox(height: 20),
+
+            // Stats Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildStatCard(Icons.groups, "1000+", "Patients"),
+                _buildStatCard(Icons.badge, "10 Yrs", "Experience"),
+                _buildStatCard(
+                  Icons.star,
+                  doctor["rating"]?.toString() ?? "",
+                  "Ratings",
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+
+            // About Doctor
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "About Doctor",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
-           
-            const SizedBox(height: 20),
-            const Text("About Doctor",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Text(
-              doctor["bio"] ??
-                  "Dr. ${"Unknown"} has over 10 years of experience in healthcare, providing trusted and personalized treatment for patients.",
-              style: const TextStyle(fontSize: 14, color: Colors.black87),
+              doctor["bio"],
+              style: TextStyle(
+                color: Colors.grey[700],
+                fontSize: 14,
+                height: 1.4,
+              ),
             ),
             const SizedBox(height: 20),
-            const Text("Consultation Fee",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Text(
-              "₹${doctor["consultationFee"] ?? "500"}",
-              style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.green),
+
+            // Working Time
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "Working time",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
             ),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "${doctor["availableDays"].join(", ")} (${doctor["availableSlots"].join(", ")})",
+                style: TextStyle(color: Colors.grey[700], fontSize: 14),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Communication
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "Communication",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(height: 12),
+            _buildCommTile(
+              Icons.chat_bubble,
+              Colors.pink[100]!,
+              "Messaging",
+              "Chat me up, share photos.",
+            ),
+            _buildCommTile(
+              Icons.call,
+              Colors.blue[100]!,
+              "Audio Call",
+              "Call your doctor directly.",
+            ),
+            _buildCommTile(
+              Icons.videocam,
+              Colors.orange[100]!,
+              "Video Call",
+              "See your doctor live.",
+            ),
+            const SizedBox(height: 30),
           ],
         ),
       ),
-      
+
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(12.0),
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            minimumSize: const Size(double.infinity, 55),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () {
+              _showBookingSheet(context);
+            },
+            child: const Text(
+              "Book Appointment",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
           ),
-          onPressed: () => _showBookingSheet(context),
-          child: const Text("Book Appointment", style: TextStyle(fontSize: 18)),
         ),
+      ),
+    );
+  }
+
+  Widget _buildStatCard(IconData icon, String value, String label) {
+    return Container(
+      width: 100,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(color: Colors.black12, blurRadius: 6, spreadRadius: 1),
+        ],
+      ),
+      child: Column(
+        children: [
+          Icon(icon, size: 28, color: Colors.blue),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          const SizedBox(height: 4),
+          Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCommTile(
+    IconData icon,
+    Color bgColor,
+    String title,
+    String subtitle,
+  ) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: bgColor,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: Colors.black87),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

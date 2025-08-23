@@ -5,6 +5,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:healthcare_app/firebase_options.dart';
 import 'package:healthcare_app/main_page.dart';
 import 'package:healthcare_app/pages/authentication/login_page.dart';
+import 'package:healthcare_app/pages/authentication/select_user_page.dart';
+import 'package:healthcare_app/pages/home/test.dart';
 import 'package:healthcare_app/widgets/my_appointment.dart';
 
 void main() async{
@@ -58,10 +60,12 @@ class AuthWrapper extends StatelessWidget {
 
         if (snapshot.hasData) {
           // User is signed in
-          return const MainPage();
+           return const MainPage();
+          //return const DoctorProfilePage();
         } else {
           // User is signed out
           return  const LoginPage();
+          //return  const SelectRolePage();
         }
       },
     );

@@ -8,8 +8,7 @@ import 'package:flutter/material.dart';
 class AuthService {
   static final FirebaseAuth _auth = FirebaseAuth.instance;
   static final GoogleSignIn _googleSignIn = GoogleSignIn();
-    static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
+  static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   static Future<UserCredential?> signInWithGoogle(BuildContext context) async {
     try {
@@ -22,7 +21,8 @@ class AuthService {
       }
 
       // 2. Obtain the auth details from the request
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
       // 3. Create a new credential
       final AuthCredential credential = GoogleAuthProvider.credential(
@@ -31,16 +31,18 @@ class AuthService {
       );
 
       // 4. Sign in to Firebase with the credential
-      final UserCredential userCredential = await _auth.signInWithCredential(credential);
+      final UserCredential userCredential = await _auth.signInWithCredential(
+        credential,
+      );
 
       // 5. You can now access the user information
       final User? user = userCredential.user;
       print("Signed in with Google: ${user?.displayName}");
-if (user != null) {
+      if (user != null) {
         // Now, we'll store the user's data in Firestore.
         // We will use the Firebase Authentication UID as the document ID
         // because it is guaranteed to be unique.
-        await _saveUserData(user);
+        await _saveUserData(user, 'user');
       }
 
       // Show a success message
@@ -73,10 +75,84 @@ if (user != null) {
     }
   }
 
-  static Future<void> _saveUserData(User user) async {
+  // ---------------- Email + Password Sign In ----------------
+  static Future<UserCredential?> signInWithEmailAndPassword(
+    BuildContext context,
+    String email,
+    String password,
+  ) async {
+    try {
+      final userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      final user = userCredential.user;
+      if (user != null) {
+        await _saveUserData(user, 'doctor');
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Logged in as ${user?.email}"),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Login failed: ${e.message}"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return null;
+    }
+  }
+
+  // ---------------- Email + Password Register ----------------
+  static Future<UserCredential?> registerWithEmailAndPassword(
+    BuildContext context,
+    String email,
+    String password,
+  ) async {
+    try {
+      final userCredential = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      final user = userCredential.user;
+      if (user != null) {
+        await _saveUserData(user, 'doctor');
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Registered as ${user?.email}"),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Registration failed: ${e.message}"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return null;
+    }
+  }
+
+  static Future<void> _saveUserData(User user, String role) async {
     final userDocRef = _firestore.collection('users').doc(user.uid);
+    final doctorDocRef = _firestore.collection('doctors').doc(user.uid);
 
     final docSnapshot = await userDocRef.get();
+    final doctordocSnapshot = await doctorDocRef.get();
 
     // Check if the user document already exists
     if (!docSnapshot.exists) {
@@ -86,12 +162,53 @@ if (user != null) {
       await userDocRef.set({
         'uid': user.uid,
         'email': user.email,
-        'displayName': user.displayName,
-        'photoURL': user.photoURL,
+        'displayName': user.displayName ?? user.email.toString().split('@')[0],
+        'photoURL':
+            user.photoURL ??
+            "https://randomuser.me/api/portraits/men/${Random().nextInt(100)}.jpg",
         'customId': customId,
         'createdAt': FieldValue.serverTimestamp(),
+        'role': role,
       });
+
       print('New user document created with custom ID: $customId');
+    } else {
+      // User document already exists, no need to create it again.
+      print('User document already exists.');
+    }
+
+    if (!doctordocSnapshot.exists) {
+      await doctorDocRef.set({
+        "fullName": "Dr. Manoj Gupta",
+        "gender": "Male",
+        "dateOfBirth": "1981-06-02",
+        "profilePicture": "https://randomuser.me/api/portraits/men/7.jpg",
+        "contactNumber": "+91-9678901234",
+        "email": "manoj.gupta@example.com",
+        "address": {
+          "city": "Jaipur",
+          "state": "Rajasthan",
+          "country": "India",
+          "pincode": "302001",
+        },
+        "specialization": "Oncologist",
+        "qualifications": ["MBBS", "DM Oncology"],
+        "experienceYears": 14,
+        "languagesSpoken": ["English", "Hindi"],
+        "licenseNumber": "MCI1007",
+        "affiliatedHospital": ["SMS Hospital"],
+        "consultationType": "offline",
+        "availableDays": ["Mon", "Wed", "Fri"],
+        "availableSlots": ["09:00-12:00", "15:00-18:00"],
+        "consultationFee": 1100,
+        "currency": "INR",
+        "rating": 4.8,
+        "reviewsCount": 188,
+        "bio": "Oncologist focusing on chemotherapy and cancer research.",
+        "createdAt": FieldValue.serverTimestamp(),
+        "updatedAt": FieldValue.serverTimestamp(),
+        "isVerified": true,
+      });
     } else {
       // User document already exists, no need to create it again.
       print('User document already exists.');
@@ -100,11 +217,11 @@ if (user != null) {
 
   // Function to generate the custom ID
   static String _generateCustomId() {
-  var random = Random();
-  // Generates a random number between 10,000,000 and 99,999,999
-  var randomNumber = 10000000 + random.nextInt(90000000);
-  return 'JTAG$randomNumber';
-}
+    var random = Random();
+    // Generates a random number between 10,000,000 and 99,999,999
+    var randomNumber = 10000000 + random.nextInt(90000000);
+    return 'JTAG$randomNumber';
+  }
 
   static Future<void> signOut() async {
     await _googleSignIn.signOut();
