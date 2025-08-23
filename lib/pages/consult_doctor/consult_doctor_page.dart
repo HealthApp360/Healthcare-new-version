@@ -228,7 +228,7 @@ class _ConsultDoctorPageState extends State<ConsultDoctorPage>
         //   leading: Icon(Icons.alarm, size: 24.r),
         //   title: Text("Dr. Meera - Aug 7, 4:00 PM", style: TextStyle(fontSize: 14.sp)),
         // ),
-        SizedBox(height: 200, child: MyAppointmentsList(userId: user.uid)),
+        SizedBox(height: 200, child: MyAppointmentsList(userId: user.uid,role:'user')),
 
         SizedBox(height: 20.h),
         Text(

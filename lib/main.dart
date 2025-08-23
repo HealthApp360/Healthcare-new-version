@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +7,7 @@ import 'package:healthcare_app/firebase_options.dart';
 import 'package:healthcare_app/main_page.dart';
 import 'package:healthcare_app/pages/authentication/login_page.dart';
 import 'package:healthcare_app/pages/authentication/select_user_page.dart';
+import 'package:healthcare_app/pages/home/doctor_home_page.dart';
 import 'package:healthcare_app/pages/home/test.dart';
 import 'package:healthcare_app/widgets/my_appointment.dart';
 
@@ -46,8 +48,45 @@ class HealthCareApp extends StatelessWidget {
     );
   }
 }
+// class AuthWrapper extends StatelessWidget {
+//   const AuthWrapper({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return StreamBuilder<User?>(
+//       stream: FirebaseAuth.instance.authStateChanges(),
+//       builder: (context, snapshot) {
+//         if (snapshot.connectionState == ConnectionState.waiting) {
+//           return const Center(child: CircularProgressIndicator());
+//         }
+
+//         if (snapshot.hasData) {
+//           // User is signed in
+//            return const MainPage();
+//           //return const DoctorProfilePage();
+//         } else {
+//           // User is signed out
+//           return  const LoginPage();
+//           //return  const SelectRolePage();
+//         }
+//       },
+//     );
+//   }
+// }
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
+
+  Future<String?> _getUserRole(String uid) async {
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .get();
+
+    if (userDoc.exists) {
+      return userDoc.data()?['role'] as String?;
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,16 +97,34 @@ class AuthWrapper extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
 
-        if (snapshot.hasData) {
-          // User is signed in
-           return const MainPage();
-          //return const DoctorProfilePage();
-        } else {
+        if (!snapshot.hasData) {
           // User is signed out
-          return  const LoginPage();
-          //return  const SelectRolePage();
+          return const LoginPage();
         }
+
+        final user = snapshot.data!;
+        return FutureBuilder<String?>(
+          future: _getUserRole(user.uid),
+          builder: (context, roleSnapshot) {
+            if (roleSnapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (!roleSnapshot.hasData || roleSnapshot.data == null) {
+              return const Center(child: Text("Role not found"));
+            }
+
+            final role = roleSnapshot.data;
+
+            if (role == 'doctor') {
+              return const DoctorHomePage();
+            } else {
+              return const MainPage();
+            }
+          },
+        );
       },
     );
   }
 }
+
