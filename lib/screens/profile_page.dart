@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:healthcare_app/main.dart';
 import 'package:healthcare_app/pages/authentication/login_page.dart';
 import 'package:healthcare_app/services/AuthServices.dart';
 import 'profile_details_page.dart';
@@ -61,9 +62,10 @@ class ProfilePage extends StatelessWidget {
             onTap: () async {
               await AuthService.signOut();
               Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (context) => const LoginPage()),
+                MaterialPageRoute(builder: (context) =>  HealthCareApp()),
                 (Route<dynamic> route) => false,
               );
+              
             },
           ),
         ],

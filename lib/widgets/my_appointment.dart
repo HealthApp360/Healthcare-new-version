@@ -126,6 +126,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:healthcare_app/pages/online_consult/caller_page.dart';
+import 'package:healthcare_app/pages/online_consult/zego_call_page.dart';
 import 'package:jitsi_meet_flutter_sdk/jitsi_meet_flutter_sdk.dart';
 
 class MyAppointmentsList extends StatelessWidget {
@@ -242,15 +243,16 @@ class MyAppointmentsList extends StatelessWidget {
                     trailing: const Icon(Icons.video_call, color: Colors.blue),
                     onTap: () async {
 
-//                       Navigator.push(
-//   context,
-//   MaterialPageRoute(
-//     builder: (context) => VideoCallPage(
-//       token: "YOUR_TEMP_TOKEN",
-//       channelName: "appointment_${appointments[index].id}", // Must be same for both users
-//     ),
-//   ),
-// );
+                      Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (context) => ZegoCallPage(
+      callID: "appointment_${appointments[index].id}",
+      userName: name,
+      userid: otherPersonId,
+    ),
+  ),
+);
                       // final roomName = "appointment_${appointments[index].id}";
                       // await _joinMeeting(
                       //   roomName: roomName,

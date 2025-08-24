@@ -38,7 +38,7 @@ dependencies:
   pretty_qr_code: ^3.5.0
   jitsi_meet_flutter_sdk: ^11.4.0
   zego_uikit_prebuilt_call: ^4.18.0
-  zego_uikit_signaling_plugin: ^2.8.16
+  lottie: ^3.3.1
 
 
 

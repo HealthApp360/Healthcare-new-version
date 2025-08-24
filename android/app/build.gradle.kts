@@ -7,10 +7,11 @@ plugins {
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
+val kotlin_version = project.findProperty("kotlin_version") as String
 
 android {
     namespace = "com.example.healthcare_app"
-    compileSdk = 35
+    compileSdk = 36
     ndkVersion = "27.0.12077973" // NDK version fixed in previous step
 
     compileOptions {
@@ -41,10 +42,17 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android.txt"),
+                file("proguard-rules.pro")
+            )
         }
     }
 }
 
 flutter {
     source = "../.."
+}
+dependencies {
+  implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version")
 }
