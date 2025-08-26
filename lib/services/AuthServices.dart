@@ -148,70 +148,74 @@ class AuthService {
   }
 
   static Future<void> _saveUserData(User user, String role) async {
-    final userDocRef = _firestore.collection('users').doc(user.uid);
-    final doctorDocRef = _firestore.collection('doctors').doc(user.uid);
+    if (role == "doctors") {
+      final doctorDocRef = _firestore.collection('doctors').doc(user.uid);
+      final doctordocSnapshot = await doctorDocRef.get();
 
-    final docSnapshot = await userDocRef.get();
-    final doctordocSnapshot = await doctorDocRef.get();
-
-    // Check if the user document already exists
-    if (!docSnapshot.exists) {
-      // It's a new user, so create a new document and generate the custom ID.
-      final customId = _generateCustomId(); // Pass the UID for a unique seed
-
-      await userDocRef.set({
-        'uid': user.uid,
-        'email': user.email,
-        'displayName': user.displayName ?? user.email.toString().split('@')[0],
-        'photoURL':
-            user.photoURL ??
-            "https://randomuser.me/api/portraits/men/${Random().nextInt(100)}.jpg",
-        'customId': customId,
-        'createdAt': FieldValue.serverTimestamp(),
-        'role': role,
-      });
-
-      print('New user document created with custom ID: $customId');
+      if (!doctordocSnapshot.exists) {
+        await doctorDocRef.set({
+          "fullName": "Dr. Manoj Gupta",
+          "gender": "Male",
+          "dateOfBirth": "1981-06-02",
+          "profilePicture": "https://randomuser.me/api/portraits/men/7.jpg",
+          "contactNumber": "+91-9678901234",
+          "email": "manoj.gupta@example.com",
+          "address": {
+            "city": "Jaipur",
+            "state": "Rajasthan",
+            "country": "India",
+            "pincode": "302001",
+          },
+          "specialization": "Oncologist",
+          "qualifications": ["MBBS", "DM Oncology"],
+          "experienceYears": 14,
+          "languagesSpoken": ["English", "Hindi"],
+          "licenseNumber": "MCI1007",
+          "affiliatedHospital": ["SMS Hospital"],
+          "consultationType": "offline",
+          "availableDays": ["Mon", "Wed", "Fri"],
+          "availableSlots": ["09:00-12:00", "15:00-18:00"],
+          "consultationFee": 1100,
+          "currency": "INR",
+          "rating": 4.8,
+          "reviewsCount": 188,
+          "bio": "Oncologist focusing on chemotherapy and cancer research.",
+          "createdAt": FieldValue.serverTimestamp(),
+          "updatedAt": FieldValue.serverTimestamp(),
+          "isVerified": true,
+        });
+      } else {
+        // User document already exists, no need to create it again.
+        print('User document already exists.');
+      }
     } else {
-      // User document already exists, no need to create it again.
-      print('User document already exists.');
-    }
+      final userDocRef = _firestore.collection('users').doc(user.uid);
 
-    if (!doctordocSnapshot.exists) {
-      await doctorDocRef.set({
-        "fullName": "Dr. Manoj Gupta",
-        "gender": "Male",
-        "dateOfBirth": "1981-06-02",
-        "profilePicture": "https://randomuser.me/api/portraits/men/7.jpg",
-        "contactNumber": "+91-9678901234",
-        "email": "manoj.gupta@example.com",
-        "address": {
-          "city": "Jaipur",
-          "state": "Rajasthan",
-          "country": "India",
-          "pincode": "302001",
-        },
-        "specialization": "Oncologist",
-        "qualifications": ["MBBS", "DM Oncology"],
-        "experienceYears": 14,
-        "languagesSpoken": ["English", "Hindi"],
-        "licenseNumber": "MCI1007",
-        "affiliatedHospital": ["SMS Hospital"],
-        "consultationType": "offline",
-        "availableDays": ["Mon", "Wed", "Fri"],
-        "availableSlots": ["09:00-12:00", "15:00-18:00"],
-        "consultationFee": 1100,
-        "currency": "INR",
-        "rating": 4.8,
-        "reviewsCount": 188,
-        "bio": "Oncologist focusing on chemotherapy and cancer research.",
-        "createdAt": FieldValue.serverTimestamp(),
-        "updatedAt": FieldValue.serverTimestamp(),
-        "isVerified": true,
-      });
-    } else {
-      // User document already exists, no need to create it again.
-      print('User document already exists.');
+      final docSnapshot = await userDocRef.get();
+
+      // Check if the user document already exists
+      if (!docSnapshot.exists) {
+        // It's a new user, so create a new document and generate the custom ID.
+        final customId = _generateCustomId(); // Pass the UID for a unique seed
+
+        await userDocRef.set({
+          'uid': user.uid,
+          'email': user.email,
+          'displayName':
+              user.displayName ?? user.email.toString().split('@')[0],
+          'photoURL':
+              user.photoURL ??
+              "https://randomuser.me/api/portraits/men/${Random().nextInt(100)}.jpg",
+          'customId': customId,
+          'createdAt': FieldValue.serverTimestamp(),
+          'role': role,
+        });
+
+        print('New user document created with custom ID: $customId');
+      } else {
+        // User document already exists, no need to create it again.
+        print('User document already exists.');
+      }
     }
   }
 

@@ -123,46 +123,56 @@ Widget build(BuildContext context) {
     child: Container(
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            Color.fromARGB(255, 188, 250, 247),
-            Color.fromARGB(255, 118, 205, 237),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: Colors.blue.shade100),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.blue.shade100.withOpacity(0.3),
-            blurRadius: 5.r,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        // gradient: const LinearGradient(
+        //   colors: [
+        //     Color.fromARGB(255, 188, 250, 247),
+        //     Color.fromARGB(255, 118, 205, 237),
+        //   ],
+        // ),
+        // borderRadius: BorderRadius.circular(12.r),
+        // border: Border.all(color: Colors.blue.shade100),
+        // boxShadow: [
+        //   BoxShadow(
+        //     color: Colors.blue.shade100.withOpacity(0.3),
+        //     blurRadius: 5.r,
+        //     offset: const Offset(0, 3),
+        //   ),
+        // ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "JEETAG",
-            style: TextStyle(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.bold,
-              color: const Color.fromARGB(255, 0, 0, 0),
-              letterSpacing: 1.5,
-            ),
-          ),
-          SizedBox(height: 6.h),
+          // Text(
+          //   "JEETAG",
+          //   style: TextStyle(
+          //     fontSize: 12.sp,
+          //     fontWeight: FontWeight.bold,
+          //     color: const Color.fromARGB(255, 0, 0, 0),
+          //     letterSpacing: 1.5,
+          //   ),
+          // ),
+          // SizedBox(height: 6.h),
           Row(
             children: [
-              CircleAvatar(
-                radius: 24.r,
-                backgroundImage: imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
-                backgroundColor: Colors.grey.shade300,
-                child: imageUrl.isEmpty
-                    ? Icon(Icons.person, size: 24.r, color: Colors.white)
-                    : null,
+              // CircleAvatar(
+              //   radius: 24.r,
+              //   backgroundImage: imageUrl.isNotEmpty ? NetworkImage(user.photoURL ?? "") : null,
+              //   backgroundColor: Colors.grey.shade300,
+              //   child: Image.network(user.photoURL ?? "")
+              //   // imageUrl.isEmpty
+              //   //     ? Icon(Icons.person, size: 24.r, color: Colors.white)
+              //   //     : null,
+              // ),
+
+              ClipRRect(
+                borderRadius: BorderRadiusGeometry.circular(100),
+                child: Container(
+                  width: 50,
+                  height: 50,
+                
+                  child: Image.network(user.photoURL ?? "")),
               ),
-              SizedBox(width: 12.w),
+              SizedBox(width: 15.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,9 +180,9 @@ Widget build(BuildContext context) {
                     Text(
                       user!.displayName ?? 'User',
                       style: TextStyle(
-                        fontSize: 14.sp,
+                        fontSize: 15.sp,
                         fontWeight: FontWeight.bold,
-                        color: Colors.blue.shade800,
+                        color: Colors.black87,
                       ),
                     ),
                     SizedBox(height: 2.h),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
@@ -96,8 +97,8 @@ class _HomePageState extends State<HomePage> {
 
 @override
 Widget build(BuildContext context) {
-  return Scaffold(
-    backgroundColor: Colors.grey.shade50,
+  return  Scaffold(
+    //backgroundColor: Colors.grey.shade50,
     floatingActionButton: Container(
       width: 60,
       height: 60,
@@ -134,149 +135,162 @@ Widget build(BuildContext context) {
       ),
     ),
     body: CustomScrollView(
-
+  
         slivers: [
           SliverAppBar(
-            backgroundColor: Colors.white,
+           // backgroundColor: const Color.fromARGB(255, 161, 255, 247),
             elevation: 0,
             pinned: true,
             expandedHeight: 250.h,
+
             flexibleSpace: FlexibleSpaceBar(
-              background: Padding(
-                padding: EdgeInsets.only(top: 8.h, left: 16.w, right: 16.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(Icons.location_on,
-                            color: Colors.grey.shade600, size: 18.r),
-                        SizedBox(width: 6.w),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Flexible(
-                                    child: Text(
-                                      locality,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 11.sp,
-                                        color: Colors.black87,
+              background: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Color.fromARGB(255, 127, 225, 250),
+                      Color.fromARGB(255, 255, 255, 255),
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.only(top: 8.h, left: 16.w, right: 16.w),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.location_on,
+                              color: Colors.grey.shade600, size: 18.r),
+                          SizedBox(width: 6.w),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        locality,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 11.sp,
+                                          color: Colors.black87,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  SizedBox(width: 20.w),
-                                  Text(
-                                    "JEVEENTAG",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16.sp,
-                                      letterSpacing: 1.1,
+                                    SizedBox(width: 20.w),
+                                    Text(
+                                      "JEVEENTAG",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16.sp,
+                                        letterSpacing: 1.1,
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              Text(
-                                postalCode,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 9.sp,
-                                  color: Colors.grey.shade600,
+                                  ],
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 12.h),
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.person,
-                              size: 22.r, color: Colors.blue.shade700),
-                          tooltip: 'Profile',
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const ProfilePage()),
-                            );
-                          },
-                        ),
-                        Expanded(
-                          child: Container(
-                            height: 38.h,
-                            padding: EdgeInsets.symmetric(horizontal: 12.w),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade100,
-                              borderRadius: BorderRadius.circular(12.r),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 6,
-                                  offset: Offset(0, 3),
-                                )
+                                Text(
+                                  postalCode,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 9.sp,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                ),
                               ],
                             ),
-                            child: const TextField(
-                              decoration: InputDecoration(
-                                hintText: 'Search...',
-                                border: InputBorder.none,
-                                prefixIcon: Icon(Icons.search),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 12.h),
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.person,
+                                size: 22.r, color: Colors.blue.shade700),
+                            tooltip: 'Profile',
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const ProfilePage()),
+                              );
+                            },
+                          ),
+                          Expanded(
+                            child: Container(
+                              height: 38.h,
+                              padding: EdgeInsets.symmetric(horizontal: 12.w),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(12.r),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black12,
+                                    blurRadius: 6,
+                                    offset: Offset(0, 3),
+                                  )
+                                ],
+                              ),
+                              child: const TextField(
+                                decoration: InputDecoration(
+                                  hintText: 'Search...',
+                                  border: InputBorder.none,
+                                  prefixIcon: Icon(Icons.search),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.notifications_none,
-                              size: 22.r, color: Colors.blue.shade700),
-                          tooltip: 'Notifications',
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      const NotificationPage()),
-                            );
-                          },
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.help_outline,
-                              size: 22.r, color: Colors.blue.shade700),
-                          tooltip: 'Help',
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      const HelpCenterPage()),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 10.h),
-                    Padding(
-                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 7.h),
-                child: DigitalIDCard(
-                  name: "John Doe",
-                  jeeId: "JTAG1234567890",
-                  abhaNumber: "1234-5678-9012",
-                  imageUrl: "", // or provide a real URL if available
-                  onTabChanged: (tab) {
-                    widget.onNavigate('digitalid', 'digitalid');
-                  },
+                          IconButton(
+                            icon: Icon(Icons.notifications_none,
+                                size: 22.r, color: Colors.blue.shade700),
+                            tooltip: 'Notifications',
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const NotificationPage()),
+                              );
+                            },
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.help_outline,
+                                size: 22.r, color: Colors.blue.shade700),
+                            tooltip: 'Help',
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const HelpCenterPage()),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 10.h),
+                      Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 7.h),
+                  child: DigitalIDCard(
+                    name: "John Doe",
+                    jeeId: "JTAG1234567890",
+                    abhaNumber: "1234-5678-9012",
+                    imageUrl: "", // or provide a real URL if available
+                    onTabChanged: (tab) {
+                      widget.onNavigate('digitalid', 'digitalid');
+                    },
+                  ),
                 ),
-              ),
-
-                  ],
+                
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -284,7 +298,7 @@ Widget build(BuildContext context) {
           SliverToBoxAdapter(child: _buildExploreSection()),
           SliverToBoxAdapter(child: _buildHealthDashboard()), // add this here
           SliverToBoxAdapter(child: _buildAboutSection()),     // move About section here too
-
+  
          
         ],
       ),

@@ -140,6 +140,7 @@ class AuthWrapper extends StatelessWidget {
               return const DoctorHomePage();
             } else {
               return const MainPage();
+               //return const FetchingDataScreen();
             }
           },
         );

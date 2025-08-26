@@ -8,7 +8,14 @@ class FetchingDataScreen extends StatelessWidget {
     return  Scaffold(
       body: Center(
         child: 
-       Lottie.asset("assets/fetching.json")
+       Column(
+        mainAxisSize: MainAxisSize.min,
+         children: [
+           Lottie.asset("assets/fetching.json"),
+           SizedBox(height: 20,),
+           Text('Fetching Data....',style: TextStyle(color: Colors.grey),)
+         ],
+       )
         // Column(
         //   mainAxisSize: MainAxisSize.min,
         //   children: [
