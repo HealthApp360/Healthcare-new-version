@@ -13,6 +13,7 @@ import 'package:healthcare_app/widgets/my_appointment.dart';
 
 class FamilyAccessPage extends StatefulWidget {
   const FamilyAccessPage({super.key});
+
   @override
   State<FamilyAccessPage> createState() => _FamilyAccessPageState();
 }
@@ -479,7 +480,7 @@ class _FamilyAccessPageState extends State<FamilyAccessPage> {
                           ),
                         ),
                       ),
-                    ]),
+                    ]), 
                   ),
                 ),
 
