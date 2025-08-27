@@ -128,6 +128,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:healthcare_app/pages/online_consult/caller_page.dart';
 import 'package:healthcare_app/pages/online_consult/zego_call_page.dart';
 import 'package:jitsi_meet_flutter_sdk/jitsi_meet_flutter_sdk.dart';
+import 'package:zego_uikit/zego_uikit.dart';
+import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
 
 class MyAppointmentsList extends StatelessWidget {
   final String userId; // Current userId
@@ -237,27 +239,55 @@ class MyAppointmentsList extends StatelessWidget {
                         if (specialization.isNotEmpty)
                           Text(specialization),
                         const SizedBox(height: 4),
-                        Text("📅 $date   ⏰ $time"),
+                        Text("📅 $date   ⏰ $time",style: TextStyle(fontSize: 12),),
                       ],
                     ),
-                    trailing: const Icon(Icons.video_call, color: Colors.blue),
+                    trailing: 
+                    IconButton(onPressed: () async {
+                      await ZegoUIKitPrebuiltCallInvitationService().send(
+                invitees: [
+                  ZegoCallUser(
+                    otherPersonId,
+                    name
+                  ),
+                ],
+                isVideoCall: true,
+                resourceID: 'medico_call', // must match Zego Console Push Resource ID
+                // Optional extras:
+                // callID: 'your_custom_call_id',
+                // notificationTitle: 'Incoming call',
+                // notificationMessage: '$otherPersonName is calling you',
+                // customData: jsonEncode({...}),
+                // timeoutSeconds: 60,
+              );
+                    }, icon: Icon(Icons.call)),
+                    // Container(
+                    //   height: 50,
+                    //   width: 50,
+                    //   child: ZegoSendCallInvitationButton(
+                    //     isVideoCall: true,
+                    //     resourceID: "medico_call", // Same as in Zego console
+                    //     invitees: [
+                    //       ZegoUIKitUser(
+                    //         id: otherPersonId, // The user you want to call
+                    //         name: name,
+                    //       ),
+                    //     ],
+                    //   ),
+                    // ),
+                    //const Icon(Icons.video_call, color: Colors.blue),
                     onTap: () async {
 
-                      Navigator.push(
-  context,
-  MaterialPageRoute(
-    builder: (context) => ZegoCallPage(
-      callID: "appointment_${appointments[index].id}",
-      userName: name,
-      userid: otherPersonId,
-    ),
-  ),
-);
-                      // final roomName = "appointment_${appointments[index].id}";
-                      // await _joinMeeting(
-                      //   roomName: roomName,
-                      //   userName: name,
-                      // );
+//                       Navigator.push(
+//   context,
+//   MaterialPageRoute(
+//     builder: (context) => ZegoCallPage(
+//       callID: "appointment_${appointments[index].id}",
+//       userName: name,
+//       userid: otherPersonId,
+//     ),
+//   ),
+// );
                     },
                   ),
                 );

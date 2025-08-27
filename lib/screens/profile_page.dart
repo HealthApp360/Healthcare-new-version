@@ -3,6 +3,7 @@ import 'package:healthcare_app/main.dart';
 import 'package:healthcare_app/pages/authentication/login_page.dart';
 import 'package:healthcare_app/services/AuthServices.dart';
 import 'profile_details_page.dart';
+// final GlobalKey<NavigatorState> navKey = GlobalKey<NavigatorState>();
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -62,7 +63,7 @@ class ProfilePage extends StatelessWidget {
             onTap: () async {
               await AuthService.signOut();
               Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (context) =>  HealthCareApp()),
+                MaterialPageRoute(builder: (context) =>  AuthWrapper()),
                 (Route<dynamic> route) => false,
               );
               

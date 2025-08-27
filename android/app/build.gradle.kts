@@ -55,4 +55,12 @@ flutter {
 }
 dependencies {
   implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version")
+  //Introduce Firebase BoM
+  implementation("com.google.firebase:firebase-bom:31.0.2")
+
+  // Add dependencies for Firebase SDK for Google Analytics and FCM.
+  // When using BoM, do not specify the version in the Firebase dependency
+  implementation("com.google.firebase:firebase-analytics")
+  implementation("com.google.firebase:firebase-messaging:23.2.1")
+  implementation("im.zego:zpns-fcm:2.8.0") //ZPNs package for Google FCM push
 }

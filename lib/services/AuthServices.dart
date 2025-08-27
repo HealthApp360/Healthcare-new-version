@@ -4,108 +4,201 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/material.dart';
+import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
+import 'package:zego_uikit_signaling_plugin/zego_uikit_signaling_plugin.dart';
 
 class AuthService {
   static final FirebaseAuth _auth = FirebaseAuth.instance;
   static final GoogleSignIn _googleSignIn = GoogleSignIn();
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  static Future<UserCredential?> signInWithGoogle(BuildContext context) async {
+  // static Future<UserCredential?> signInWithGoogle(BuildContext context) async {
+  //   try {
+  //     // 1. Trigger the authentication flow
+  //     final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+
+  //     // Check if the user cancelled the sign-in process
+  //     if (googleUser == null) {
+  //       return null;
+  //     }
+
+  //     // 2. Obtain the auth details from the request
+  //     final GoogleSignInAuthentication googleAuth =
+  //         await googleUser.authentication;
+
+  //     // 3. Create a new credential
+  //     final AuthCredential credential = GoogleAuthProvider.credential(
+  //       accessToken: googleAuth.accessToken,
+  //       idToken: googleAuth.idToken,
+  //     );
+
+  //     // 4. Sign in to Firebase with the credential
+  //     final UserCredential userCredential = await _auth.signInWithCredential(
+  //       credential,
+  //     );
+
+  //     // 5. You can now access the user information
+  //     final User? user = userCredential.user;
+  //     print("Signed in with Google: ${user?.displayName}");
+  //     if (user != null) {
+  //       await ZegoUIKitPrebuiltCallInvitationService().init(
+  //         appID:
+  //             1562336384, // Fill in the appID that you get from ZEGOCLOUD Admin Console.
+  //         appSign:
+  //             "333b3362739b2c7703286ed8448bad2970e631ffc7745678e8ae3d857090d499", // Fill in the appSign that you get from ZEGOCLOUD Admin Console.
+  //         userID: user.uid,
+  //         userName: user.displayName ?? "user",
+  //         plugins: [ZegoUIKitSignalingPlugin()],
+  //       );
+  //       // Now, we'll store the user's data in Firestore.
+  //       // We will use the Firebase Authentication UID as the document ID
+  //       // because it is guaranteed to be unique.
+  //       await _saveUserData(user, 'user');
+  //     }
+
+  //     // Show a success message
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text('Signed in as ${user?.displayName}'),
+  //         backgroundColor: Colors.green,
+  //       ),
+  //     );
+
+  //     return userCredential;
+  //   } on FirebaseAuthException catch (e) {
+  //     print("Firebase Auth Exception: ${e.message}");
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text('Sign in failed: ${e.message}'),
+  //         backgroundColor: Colors.red,
+  //       ),
+  //     );
+  //     return null;
+  //   } catch (e) {
+  //     print("General Error: $e");
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text('An unexpected error occurred.'),
+  //         backgroundColor: Colors.red,
+  //       ),
+  //     );
+  //     return null;
+  //   }
+  // }
+
+  // // ---------------- Email + Password Sign In ----------------
+  // static Future<UserCredential?> signInWithEmailAndPassword(
+  //   BuildContext context,
+  //   String email,
+  //   String password,
+  // ) async {
+  //   try {
+  //     final userCredential = await _auth.signInWithEmailAndPassword(
+  //       email: email,
+  //       password: password,
+  //     );
+
+  //     final user = userCredential.user;
+  //     if (user != null) {
+  //       await ZegoUIKitPrebuiltCallInvitationService().init(
+  //         appID:
+  //             1562336384, // Fill in the appID that you get from ZEGOCLOUD Admin Console.
+  //         appSign:
+  //             "333b3362739b2c7703286ed8448bad2970e631ffc7745678e8ae3d857090d499", // Fill in the appSign that you get from ZEGOCLOUD Admin Console.
+  //         userID: user.uid,
+  //         userName: user.displayName ?? "user",
+  //         plugins: [ZegoUIKitSignalingPlugin()],
+  //       );
+  //       await _saveUserData(user, 'doctor');
+  //     }
+
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text("Logged in as ${user?.email}"),
+  //         backgroundColor: Colors.green,
+  //       ),
+  //     );
+
+  //     return userCredential;
+  //   } on FirebaseAuthException catch (e) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text("Login failed: ${e.message}"),
+  //         backgroundColor: Colors.red,
+  //       ),
+  //     );
+  //     return null;
+  //   }
+  // }
+
+
+  /// Unified login method
+  static Future<User?> signInUser( {
+    required BuildContext context,
+    String? email,
+    String? password,
+    bool useGoogle = false,
+    String role = 'user', // can be 'user' or 'doctor'
+  }) async {
     try {
-      // 1. Trigger the authentication flow
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      UserCredential userCredential;
 
-      // Check if the user cancelled the sign-in process
-      if (googleUser == null) {
-        return null;
+      if (useGoogle) {
+        // Google Sign-In
+        final googleUser = await _googleSignIn.signIn();
+        if (googleUser == null) return null;
+
+        final googleAuth = await googleUser.authentication;
+        final credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+        userCredential = await _auth.signInWithCredential(credential);
+      } else {
+        // Email/Password Sign-In
+        if (email == null || password == null) {
+          throw FirebaseAuthException(
+            code: "invalid-input",
+            message: "Email and password are required",
+          );
+        }
+        userCredential = await _auth.signInWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
       }
 
-      // 2. Obtain the auth details from the request
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
+      final user = userCredential.user;
+      if (user == null) return null;
 
-      // 3. Create a new credential
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
+      // ✅ Initialize Zego Service (Correct Singleton Call)
+      // await ZegoUIKitPrebuiltCallInvitationService().init(
+      //   appID: 1562336384,
+      //   appSign: "333b3362739b2c7703286ed8448bad2970e631ffc7745678e8ae3d857090d499",
+      //   userID: user.uid,
+      //   userName: user.displayName ?? user.email ?? "User",
+      //   plugins: [ZegoUIKitSignalingPlugin()],
+      // );
 
-      // 4. Sign in to Firebase with the credential
-      final UserCredential userCredential = await _auth.signInWithCredential(
-        credential,
-      );
+      // ✅ Save User Data
+      await _saveUserData(user, role);
 
-      // 5. You can now access the user information
-      final User? user = userCredential.user;
-      print("Signed in with Google: ${user?.displayName}");
-      if (user != null) {
-        // Now, we'll store the user's data in Firestore.
-        // We will use the Firebase Authentication UID as the document ID
-        // because it is guaranteed to be unique.
-        await _saveUserData(user, 'user');
-      }
-
-      // Show a success message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Signed in as ${user?.displayName}'),
+          content: Text('Signed in as ${user.displayName ?? user.email}'),
           backgroundColor: Colors.green,
         ),
       );
 
-      return userCredential;
+      return user;
     } on FirebaseAuthException catch (e) {
-      print("Firebase Auth Exception: ${e.message}");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Sign in failed: ${e.message}'),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text("Login failed: ${e.message}"), backgroundColor: Colors.red),
       );
       return null;
     } catch (e) {
-      print("General Error: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('An unexpected error occurred.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return null;
-    }
-  }
-
-  // ---------------- Email + Password Sign In ----------------
-  static Future<UserCredential?> signInWithEmailAndPassword(
-    BuildContext context,
-    String email,
-    String password,
-  ) async {
-    try {
-      final userCredential = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      final user = userCredential.user;
-      if (user != null) {
-        await _saveUserData(user, 'doctor');
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Logged in as ${user?.email}"),
-          backgroundColor: Colors.green,
-        ),
-      );
-
-      return userCredential;
-    } on FirebaseAuthException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Login failed: ${e.message}"),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text("An error occurred: $e"), backgroundColor: Colors.red),
       );
       return null;
     }
@@ -230,6 +323,7 @@ class AuthService {
   static Future<void> signOut() async {
     await _googleSignIn.signOut();
     await _auth.signOut();
+    ZegoUIKitPrebuiltCallInvitationService().uninit();
     print("User signed out.");
   }
 }
